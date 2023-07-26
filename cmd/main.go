@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"payments/src/controller"
+	"payments/src/notifier"
 	"payments/src/outbox"
 	"payments/src/storage"
 	"payments/src/usecase"
@@ -15,6 +16,8 @@ func main() {
 	paymentService := usecase.NewPaymentService(paymentsDB)
 	serviceWithOutbox := outbox.NewSaveToOutboxDecorator(paymentService, outboxDB)
 	controller := controller.NewController(serviceWithOutbox)
+
+	go outbox.NewSendEventsService(outboxDB, notifier.NewTestNotifier()).Run()
 
 	handler := http.NewServeMux()
 	handler.HandleFunc("/processPayment", controller.ProcessPayment)
