@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"payments/src/controller"
+	"payments/src/errors"
 	"payments/src/notifier"
 	"payments/src/outbox"
 	"payments/src/storage"
@@ -16,8 +17,20 @@ func main() {
 	paymentService := usecase.NewPaymentService(paymentsDB)
 	serviceWithOutbox := outbox.NewSaveToOutboxDecorator(paymentService, outboxDB)
 	controller := controller.NewController(serviceWithOutbox)
+	sendEventsService := outbox.NewSendEventsService(outboxDB, notifier.NewTestNotifier())
 
-	go outbox.NewSendEventsService(outboxDB, notifier.NewTestNotifier()).Run()
+	go func() {
+		for {
+			err := sendEventsService.SendNewEvent()
+			if err != nil {
+				if err == errors.ErrStorageEmpty {
+					continue
+				}
+
+				fmt.Printf("Warning: %v", err)
+			}
+		}
+	}()
 
 	handler := http.NewServeMux()
 	handler.HandleFunc("/processPayment", controller.ProcessPayment)

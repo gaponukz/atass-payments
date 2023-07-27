@@ -1,9 +1,7 @@
 package outbox
 
 import (
-	"fmt"
 	"payments/src/entities"
-	"time"
 )
 
 type popAbleStorage interface {
@@ -24,21 +22,19 @@ func NewSendEventsService(storage popAbleStorage, notifier eventSender) sendEven
 	return sendEventsService{storage: storage, notifier: notifier}
 }
 
-func (s sendEventsService) Run() {
-	for {
-		payment, err := s.storage.Pop()
-		if err != nil {
-			time.Sleep(time.Second * 3)
-			continue
-		}
-
-		err = s.notifier.Notify(payment)
-		if err != nil {
-			err = s.storage.Rollback(payment)
-			if err != nil {
-				fmt.Printf("Warning: Failed to rollback to storage: %v\n", err)
-			}
-		}
-
+func (s sendEventsService) SendNewEvent() error {
+	payment, err := s.storage.Pop()
+	if err != nil {
+		return err
 	}
+
+	err = s.notifier.Notify(payment)
+	if err != nil {
+		err = s.storage.Rollback(payment)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
