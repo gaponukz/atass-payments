@@ -1,0 +1,30 @@
+name: Lint and Test
+
+on:
+  push:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  lint-and-test:
+    name: Lint and Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.20.4
+
+      - name: Install golangci-lint
+        run: go get github.com/golangci/golangci-lint/cmd/golangci-lint@v1.42.0
+
+      - name: Run golangci-lint
+        run: golangci-lint run ./...
+
+      - name: Run Go tests
+        run: go test ./tests/...

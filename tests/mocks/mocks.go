@@ -25,6 +25,10 @@ func (m *queueMockStorage) Pop() (entities.Payment, error) {
 	return payment, nil
 }
 
+func (m *queueMockStorage) Create(payment entities.Payment) error {
+	return m.Rollback(payment)
+}
+
 func (m *queueMockStorage) Rollback(payment entities.Payment) error {
 	m.payments = append(m.payments, payment)
 	return nil
