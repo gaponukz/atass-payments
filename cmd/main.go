@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"payments/src/controller"
 	"payments/src/errors"
+	"payments/src/logger"
 	"payments/src/notifier"
 	"payments/src/outbox"
 	"payments/src/storage"
@@ -12,12 +13,14 @@ import (
 )
 
 func main() {
+	logger := logger.NewConsoleLogger()
 	paymentsDB := storage.NewJsonPaymentsStorage("payments.json")
 	outboxDB := storage.NewJsonPaymentsStorage("outbox.json")
+	loggeredOutboxDB := outbox.NewPopStorageLogger(outboxDB, logger)
 	paymentService := usecase.NewPaymentService(paymentsDB)
 	serviceWithOutbox := outbox.NewSaveToOutboxDecorator(paymentService, outboxDB)
 	controller := controller.NewController(serviceWithOutbox)
-	sendEventsService := outbox.NewSendEventsService(outboxDB, notifier.NewTestNotifier())
+	sendEventsService := outbox.NewSendEventsService(loggeredOutboxDB, notifier.NewTestNotifier())
 
 	go func() {
 		for {
@@ -27,7 +30,7 @@ func main() {
 					continue
 				}
 
-				fmt.Printf("Warning: %v", err)
+				logger.Warn(err.Error())
 			}
 		}
 	}()
