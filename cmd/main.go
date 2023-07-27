@@ -8,11 +8,20 @@ import (
 	"payments/src/logger"
 	"payments/src/notifier"
 	"payments/src/outbox"
+	"payments/src/settings"
 	"payments/src/storage"
 	"payments/src/usecase"
 )
 
 func main() {
+	config := settings.NewDotEnvSettings().Load()
+	rabbitMQNotifier, err := notifier.NewRabbitMQNotifier(config.RabbitmqUrl)
+	if err != nil {
+		panic(err.Error())
+	}
+
+	defer rabbitMQNotifier.Close()
+
 	logger := logger.NewConsoleLogger()
 	paymentsDB := storage.NewJsonPaymentsStorage("payments.json")
 	outboxDB := storage.NewJsonPaymentsStorage("outbox.json")
@@ -20,7 +29,7 @@ func main() {
 	paymentService := usecase.NewPaymentService(paymentsDB)
 	serviceWithOutbox := outbox.NewSaveToOutboxDecorator(paymentService, outboxDB)
 	controller := controller.NewController(serviceWithOutbox)
-	sendEventsService := outbox.NewSendEventsService(loggeredOutboxDB, notifier.NewTestNotifier())
+	sendEventsService := outbox.NewSendEventsService(loggeredOutboxDB, rabbitMQNotifier)
 
 	go func() {
 		for {
@@ -43,7 +52,7 @@ func main() {
 		Handler: handler,
 	}
 
-	err := server.ListenAndServe()
+	err = server.ListenAndServe()
 	if err != nil {
 		fmt.Printf("Server error: %v\n", err)
 	}
