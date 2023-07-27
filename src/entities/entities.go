@@ -5,8 +5,7 @@ type RouteID string
 type Passanger struct {
 	ID          string `json:"id"`
 	Gmail       string `json:"gmail"`
-	FirstName   string `json:"firstName"`
-	LastName    string `json:"lastName"`
+	FullName    string `json:"fullName"`
 	PhoneNumber string `json:"phoneNumber"`
 	MoveFromID  string `json:"movingFromId"`
 	MoveToID    string `json:"movingTowardsID"`

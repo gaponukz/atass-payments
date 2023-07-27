@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"os"
 	"payments/src/entities"
+	"payments/src/errors"
 )
 
 type jsonStorage struct {
@@ -54,6 +55,44 @@ func (s jsonStorage) writePaymentsToFile(payments []entities.Payment) error {
 	defer file.Close()
 
 	err = json.NewEncoder(file).Encode(payments)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s jsonStorage) Pop() (entities.Payment, error) {
+	payments, err := s.readPaymentsFromFile()
+	if err != nil {
+		return entities.Payment{}, err
+	}
+
+	numPayments := len(payments)
+	if numPayments == 0 {
+		return entities.Payment{}, errors.ErrStorageEmpty
+	}
+
+	payment := payments[numPayments-1]
+	payments = payments[:numPayments-1]
+
+	err = s.writePaymentsToFile(payments)
+	if err != nil {
+		return entities.Payment{}, err
+	}
+
+	return payment, nil
+}
+
+func (s jsonStorage) Rollback(payment entities.Payment) error {
+	payments, err := s.readPaymentsFromFile()
+	if err != nil {
+		return err
+	}
+
+	payments = append(payments, payment)
+
+	err = s.writePaymentsToFile(payments)
 	if err != nil {
 		return err
 	}
