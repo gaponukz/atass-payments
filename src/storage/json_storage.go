@@ -32,6 +32,12 @@ func (s jsonStorage) Create(payment entities.Payment) error {
 }
 
 func (s jsonStorage) readPaymentsFromFile() ([]entities.Payment, error) {
+	if _, err := os.Stat(s.filePath); os.IsNotExist(err) {
+		if err := s.createEmptyFile(); err != nil {
+			return nil, err
+		}
+	}
+
 	file, err := os.Open(s.filePath)
 	if err != nil {
 		return nil, err
@@ -45,6 +51,22 @@ func (s jsonStorage) readPaymentsFromFile() ([]entities.Payment, error) {
 	}
 
 	return payments, nil
+}
+
+func (s jsonStorage) createEmptyFile() error {
+	file, err := os.Create(s.filePath)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	emptyArray := []byte("[]")
+	_, err = file.Write(emptyArray)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (s jsonStorage) writePaymentsToFile(payments []entities.Payment) error {
