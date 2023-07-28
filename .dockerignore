@@ -156,5 +156,9 @@ fabric.properties
 .history
 .ionide
 .env
+.gitignore
+Dockerfile
+.github
+README.md
 rabbitmq
 # End of https://www.toptal.com/developers/gitignore/api/go,visualstudiocode,goland
