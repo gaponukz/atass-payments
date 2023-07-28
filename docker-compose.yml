@@ -30,3 +30,6 @@ services:
       - "8080:8080"
     env_file:
       - .env
+    volumes:
+      - ./outbox.json:/app/outbox.json
+      - ./payments.json:/app/payments.json

@@ -29,7 +29,7 @@ func NewRabbitMQNotifier(url string) (*rabbitMQNotifier, error) {
 
 	err = ch.ExchangeDeclare(
 		"payments_exchange", // exchange name
-		amqp.ExchangeTopic,  // exchange type
+		amqp.ExchangeDirect, // exchange type
 		false,               // durable
 		false,               // auto-deleted
 		false,               // internal
