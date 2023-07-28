@@ -25,7 +25,7 @@ func (c cdcService) Serve() {
 				continue
 			}
 
-			fmt.Printf(err.Error())
+			fmt.Println(err.Error())
 		}
 	}
 }
