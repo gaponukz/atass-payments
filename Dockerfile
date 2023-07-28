@@ -14,4 +14,4 @@ COPY --from=builder /go/bin/server .
 ENTRYPOINT ["./server"]
 
 LABEL Name=atass-payments Version=0.0.1
-EXPOSE 8080
+EXPOSE 9090
