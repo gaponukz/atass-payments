@@ -12,7 +12,6 @@ import (
 type rabbitMQNotifier struct {
 	conn *amqp.Connection
 	ch   *amqp.Channel
-	q    amqp.Queue
 }
 
 func NewRabbitMQNotifier(url string) (*rabbitMQNotifier, error) {
@@ -29,7 +28,7 @@ func NewRabbitMQNotifier(url string) (*rabbitMQNotifier, error) {
 
 	err = ch.ExchangeDeclare(
 		"payments_exchange", // exchange name
-		amqp.ExchangeDirect, // exchange type
+		amqp.ExchangeFanout, // exchange type
 		false,               // durable
 		false,               // auto-deleted
 		false,               // internal
@@ -42,13 +41,26 @@ func NewRabbitMQNotifier(url string) (*rabbitMQNotifier, error) {
 		return nil, err
 	}
 
-	q, err := ch.QueueDeclare(
-		"payments", // name
-		false,      // durable
-		false,      // delete when unused
-		false,      // exclusive
-		false,      // no-wait
-		nil,        // arguments
+	_, err = ch.QueueDeclare(
+		"passenger_payments", // name
+		false,                // durable
+		false,                // delete when unused
+		false,                // exclusive
+		false,                // no-wait
+		nil,                  // arguments
+	)
+	if err != nil {
+		_ = ch.Close()
+		_ = conn.Close()
+		return nil, err
+	}
+	_, err = ch.QueueDeclare(
+		"route_payments", // name
+		false,            // durable
+		false,            // delete when unused
+		false,            // exclusive
+		false,            // no-wait
+		nil,              // arguments
 	)
 	if err != nil {
 		_ = ch.Close()
@@ -59,7 +71,6 @@ func NewRabbitMQNotifier(url string) (*rabbitMQNotifier, error) {
 	return &rabbitMQNotifier{
 		conn: conn,
 		ch:   ch,
-		q:    q,
 	}, nil
 }
 
