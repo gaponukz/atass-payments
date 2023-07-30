@@ -24,7 +24,7 @@ func (s service) OnSuccessfulPayment(info dto.CratePaymentDTO) (entities.Payment
 		ID:        uuid.New().String(),
 		Amount:    info.Amount,
 		RouteID:   info.RouteID,
-		Passanger: info.Passanger,
+		Passenger: info.Passenger,
 	}
 
 	err := s.db.Create(payment)
