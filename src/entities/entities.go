@@ -8,7 +8,7 @@ type Passenger struct {
 	FullName    string `json:"fullName"`
 	PhoneNumber string `json:"phoneNumber"`
 	MoveFromID  string `json:"movingFromId"`
-	MoveToID    string `json:"movingTowardsID"`
+	MoveToID    string `json:"movingTowardsId"`
 }
 
 type Payment struct {
