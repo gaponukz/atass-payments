@@ -17,3 +17,9 @@ type Payment struct {
 	RouteID   RouteID   `json:"routeId"`
 	Passenger Passenger `json:"passenger"`
 }
+
+type OutboxData struct {
+	PaymentID string    `json:"paymentId"`
+	RouteID   RouteID   `json:"routeId"`
+	Passenger Passenger `json:"passenger"`
+}
