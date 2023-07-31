@@ -33,11 +33,11 @@ func (sts dotEnvSettings) Load() Settings {
 	return Settings{
 		RabbitmqUrl:      os.Getenv("rabbitmqUrl"),
 		Port:             os.Getenv("port"),
-		PostgresHost:     os.Getenv("postgresHost"),
-		PostgresUser:     os.Getenv("postgresUser"),
-		PostgresPassword: os.Getenv("postgresPassword"),
-		PostgresDbname:   os.Getenv("postgresDbname"),
-		PostgresPort:     os.Getenv("postgresPort"),
-		PostgresSslmode:  os.Getenv("postgresSslmode"),
+		PostgresHost:     os.Getenv("paymentsPostgresHost"),
+		PostgresUser:     os.Getenv("paymentsPostgresUser"),
+		PostgresPassword: os.Getenv("paymentsPostgresPassword"),
+		PostgresDbname:   os.Getenv("paymentsPostgresDbname"),
+		PostgresPort:     os.Getenv("paymentsPostgresPort"),
+		PostgresSslmode:  os.Getenv("paymentsPostgresSslmode"),
 	}
 }

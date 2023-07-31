@@ -3,23 +3,25 @@ package entities
 type RouteID string
 
 type Passenger struct {
-	ID          string `json:"id"`
-	Gmail       string `json:"gmail"`
-	FullName    string `json:"fullName"`
-	PhoneNumber string `json:"phoneNumber"`
-	MoveFromID  string `json:"movingFromId"`
-	MoveToID    string `json:"movingTowardsId"`
+	ID          string `json:"id" gorm:"primaryKey;not null"`
+	Gmail       string `json:"gmail" gorm:"not null"`
+	FullName    string `json:"fullName" gorm:"not null"`
+	PhoneNumber string `json:"phoneNumber" gorm:"not null"`
+	MoveFromID  string `json:"movingFromId" gorm:"not null"`
+	MoveToID    string `json:"movingTowardsId" gorm:"not null"`
 }
 
 type Payment struct {
-	ID        string    `json:"id"`
-	Amount    float64   `json:"amount"`
-	RouteID   RouteID   `json:"routeId"`
-	Passenger Passenger `json:"passenger"`
+	ID          string    `json:"id" gorm:"primaryKey;not null;unique"`
+	Amount      float64   `json:"amount" gorm:"not null"`
+	RouteID     RouteID   `json:"routeId" gorm:"not null"`
+	PassengerID string    `json:"passengerId" gorm:"not null"`
+	Passenger   Passenger `json:"passenger" gorm:"foreignKey:PassengerID"`
 }
 
 type OutboxData struct {
-	PaymentID string    `json:"paymentId"`
-	RouteID   RouteID   `json:"routeId"`
-	Passenger Passenger `json:"passenger"`
+	PaymentID   string    `json:"paymentId" gorm:"primaryKey;not null;unique"`
+	RouteID     RouteID   `json:"routeId" gorm:"not null"`
+	PassengerID string    `json:"passengerId" gorm:"not null"`
+	Passenger   Passenger `json:"passenger" gorm:"foreignKey:PassengerID"`
 }

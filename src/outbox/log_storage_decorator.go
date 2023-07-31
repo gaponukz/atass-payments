@@ -7,6 +7,7 @@ import (
 )
 
 type errorLogger interface {
+	Info(message string)
 	Error(message string)
 }
 
@@ -29,8 +30,10 @@ func (l storageLogger) Create(payment entities.Payment) error {
 	err := l.storage.Create(payment)
 	if err != nil {
 		l.logger.Error(fmt.Sprintf("Can not crate payment: %v", err))
+		return err
 	}
 
+	l.logger.Info(fmt.Sprintf("Create payment: %s", payment.ID))
 	return nil
 }
 
@@ -40,8 +43,11 @@ func (l storageLogger) PopPayment() (entities.OutboxData, error) {
 		if err != errors.ErrStorageEmpty {
 			l.logger.Error(fmt.Sprintf("Can not PopPayment from storage: %v", err))
 		}
+
+		return payment, err
 	}
 
+	l.logger.Info(fmt.Sprintf("PopPayment: %s", payment.PaymentID))
 	return payment, err
 }
 
@@ -49,7 +55,9 @@ func (l storageLogger) PushBack(payment entities.OutboxData) error {
 	err := l.storage.PushBack(payment)
 	if err != nil {
 		l.logger.Error(fmt.Sprintf("Can not PushBack payment %s: %v", payment.PaymentID, err))
+		return err
 	}
 
+	l.logger.Info(fmt.Sprintf("PushBack payment: %s", payment.PaymentID))
 	return err
 }

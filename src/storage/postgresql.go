@@ -3,9 +3,11 @@ package storage
 import (
 	"fmt"
 	"payments/src/entities"
+	"payments/src/errors"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
 type PostgresCredentials struct {
@@ -26,7 +28,9 @@ func NewPostgresUserStorage(c PostgresCredentials) (*sqlUserStorage, error) {
 		"host=%s user=%s password=%s dbname=%s port=%s sslmode=%s",
 		c.Host, c.User, c.Password, c.Dbname, c.Port, c.Sslmode,
 	)
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
+		Logger: logger.Default.LogMode(logger.Silent),
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -67,7 +71,7 @@ func (repo sqlUserStorage) PopPayment() (entities.OutboxData, error) {
 	var outboxDTO entities.OutboxData
 
 	if err := repo.db.First(&outboxDTO).Error; err != nil {
-		return entities.OutboxData{}, err
+		return entities.OutboxData{}, errors.ErrStorageEmpty
 	}
 
 	if err := repo.db.Delete(&outboxDTO).Error; err != nil {
