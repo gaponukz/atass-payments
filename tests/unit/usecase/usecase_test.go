@@ -12,7 +12,7 @@ func TestOnSuccessfulPayment(t *testing.T) {
 	const expectedAmount = 100
 	const expectedRouteID = "123"
 	expectedPassenger := entities.Passenger{ID: "321"}
-	db := mocks.NewQueueMockStorage()
+	db := mocks.NewPaymentStorageMock()
 	service := usecase.NewPaymentService(db)
 
 	payment, err := service.OnSuccessfulPayment(dto.CratePaymentDTO{
@@ -36,7 +36,7 @@ func TestOnSuccessfulPayment(t *testing.T) {
 		t.Errorf("passenger id expected %s, got %s", expectedPassenger.ID, payment.Passenger.ID)
 	}
 
-	paymentFromStorage, err := db.Pop()
+	paymentFromStorage, err := db.First()
 	if err != nil {
 		t.Error(err.Error())
 	}

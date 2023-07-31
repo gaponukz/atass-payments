@@ -22,14 +22,23 @@ func main() {
 
 	defer rabbitMQNotifier.Close()
 
+	paymentsDB, err := storage.NewPostgresUserStorage(storage.PostgresCredentials{
+		Host:     config.PostgresHost,
+		User:     config.PostgresUser,
+		Password: config.PostgresPassword,
+		Dbname:   config.PostgresDbname,
+		Port:     config.PostgresPort,
+		Sslmode:  config.PostgresSslmode,
+	})
+	if err != nil {
+		panic(err.Error())
+	}
+
 	logger := logger.NewConsoleLogger()
-	paymentsDB := storage.NewJsonPaymentsStorage("payments.json")
-	outboxDB := storage.NewJsonPaymentsStorage("outbox.json")
-	loggeredOutboxDB := outbox.NewPopStorageLogger(outboxDB, logger)
-	paymentService := usecase.NewPaymentService(paymentsDB)
-	serviceWithOutbox := outbox.NewSaveToOutboxDecorator(paymentService, outboxDB)
-	controller := controller.NewController(serviceWithOutbox)
-	sendEventsService := outbox.NewSendEventsService(loggeredOutboxDB, rabbitMQNotifier)
+	loggeredPaymentsDB := outbox.NewStorageLoggerDecorator(paymentsDB, logger)
+	paymentService := usecase.NewPaymentService(loggeredPaymentsDB)
+	controller := controller.NewController(paymentService)
+	sendEventsService := outbox.NewSendEventsService(loggeredPaymentsDB, rabbitMQNotifier)
 
 	handler := http.NewServeMux()
 	handler.HandleFunc("/processPayment", controller.ProcessPayment)

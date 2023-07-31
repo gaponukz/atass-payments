@@ -10,30 +10,45 @@ type errorLogger interface {
 	Error(message string)
 }
 
-type popStorageLogger struct {
-	storage popAbleStorage
+type paymentStorage interface {
+	Create(entities.Payment) error
+	PopPayment() (entities.OutboxData, error)
+	PushBack(payment entities.OutboxData) error
+}
+
+type storageLogger struct {
+	storage paymentStorage
 	logger  errorLogger
 }
 
-func NewPopStorageLogger(storage popAbleStorage, logger errorLogger) popStorageLogger {
-	return popStorageLogger{storage: storage, logger: logger}
+func NewStorageLoggerDecorator(storage paymentStorage, logger errorLogger) storageLogger {
+	return storageLogger{storage: storage, logger: logger}
 }
 
-func (l popStorageLogger) Pop() (entities.Payment, error) {
-	payment, err := l.storage.Pop()
+func (l storageLogger) Create(payment entities.Payment) error {
+	err := l.storage.Create(payment)
+	if err != nil {
+		l.logger.Error(fmt.Sprintf("Can not crate payment: %v", err))
+	}
+
+	return nil
+}
+
+func (l storageLogger) PopPayment() (entities.OutboxData, error) {
+	payment, err := l.storage.PopPayment()
 	if err != nil {
 		if err != errors.ErrStorageEmpty {
-			l.logger.Error(fmt.Sprintf("Can not pop payment from storage: %v", err))
+			l.logger.Error(fmt.Sprintf("Can not PopPayment from storage: %v", err))
 		}
 	}
 
 	return payment, err
 }
 
-func (l popStorageLogger) Rollback(payment entities.Payment) error {
-	err := l.storage.Rollback(payment)
+func (l storageLogger) PushBack(payment entities.OutboxData) error {
+	err := l.storage.PushBack(payment)
 	if err != nil {
-		l.logger.Error(fmt.Sprintf("Can not rollback payment %s: %v", payment.ID, err))
+		l.logger.Error(fmt.Sprintf("Can not PushBack payment %s: %v", payment.PaymentID, err))
 	}
 
 	return err
