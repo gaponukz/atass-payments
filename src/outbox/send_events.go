@@ -5,12 +5,12 @@ import (
 )
 
 type popAbleStorage interface {
-	Pop() (entities.Payment, error)
-	Rollback(entities.Payment) error
+	PopPayment() (entities.OutboxData, error)
+	PushBack(entities.OutboxData) error
 }
 
 type eventSender interface {
-	Notify(entities.Payment) error
+	Notify(entities.OutboxData) error
 }
 
 type sendEventsService struct {
@@ -23,14 +23,14 @@ func NewSendEventsService(storage popAbleStorage, notifier eventSender) sendEven
 }
 
 func (s sendEventsService) SendNewEvent() error {
-	payment, err := s.storage.Pop()
+	payment, err := s.storage.PopPayment()
 	if err != nil {
 		return err
 	}
 
 	err = s.notifier.Notify(payment)
 	if err != nil {
-		err = s.storage.Rollback(payment)
+		err = s.storage.PushBack(payment)
 		if err != nil {
 			return err
 		}

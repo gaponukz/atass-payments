@@ -9,11 +9,11 @@ type successfulEventNotifier struct{}
 
 type unsuccessfulEventNotifier struct{}
 
-func (s successfulEventNotifier) Notify(p entities.Payment) error {
+func (s successfulEventNotifier) Notify(p entities.OutboxData) error {
 	return nil
 }
 
-func (s unsuccessfulEventNotifier) Notify(p entities.Payment) error {
+func (s unsuccessfulEventNotifier) Notify(p entities.OutboxData) error {
 	return fmt.Errorf("balabla")
 }
 

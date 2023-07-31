@@ -19,17 +19,30 @@ services:
       - 15672:15672
       - 5672:5672
 
+  postgres:
+    image: postgres:latest
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U myuser -d payments"]
+      interval: 5s
+      timeout: 10s
+      retries: 5
+      start_period: 4s
+    environment:
+      POSTGRES_USER: myuser
+      POSTGRES_PASSWORD: mypassword
+      POSTGRES_DB: payments
+    ports:
+      - "5432:5432"
+
   payments_app:
     build:
       dockerfile: Dockerfile
-    hostname: localhost
     depends_on:
       rabbitmq:
+        condition: service_healthy
+      postgres:
         condition: service_healthy
     ports:
       - "9090:9090"
     env_file:
       - .env
-    volumes:
-      - ./outbox.json:/app/outbox.json
-      - ./payments.json:/app/payments.json
