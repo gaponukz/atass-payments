@@ -3,6 +3,7 @@ package notifier
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"payments/src/entities"
 	"time"
 
@@ -82,6 +83,8 @@ func (r *rabbitMQNotifier) Notify(payment entities.OutboxData) error {
 	if err != nil {
 		return err
 	}
+
+	fmt.Println(string(message))
 
 	return r.ch.PublishWithContext(ctx,
 		"payments_exchange", // exchange

@@ -70,7 +70,7 @@ func (repo sqlUserStorage) Create(payment entities.Payment) error {
 func (repo sqlUserStorage) PopPayment() (entities.OutboxData, error) {
 	var outboxDTO entities.OutboxData
 
-	if err := repo.db.First(&outboxDTO).Error; err != nil {
+	if err := repo.db.Preload("Passenger").First(&outboxDTO).Error; err != nil {
 		return entities.OutboxData{}, errors.ErrStorageEmpty
 	}
 
