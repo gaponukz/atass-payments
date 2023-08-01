@@ -1,15 +1,10 @@
-package outbox
+package logger
 
 import (
 	"fmt"
 	"payments/src/entities"
 	"payments/src/errors"
 )
-
-type errorLogger interface {
-	Info(message string)
-	Error(message string)
-}
 
 type paymentStorage interface {
 	Create(entities.Payment) error
@@ -19,10 +14,10 @@ type paymentStorage interface {
 
 type storageLogger struct {
 	storage paymentStorage
-	logger  errorLogger
+	logger  logger
 }
 
-func NewStorageLoggerDecorator(storage paymentStorage, logger errorLogger) storageLogger {
+func NewStorageLoggerDecorator(storage paymentStorage, logger logger) storageLogger {
 	return storageLogger{storage: storage, logger: logger}
 }
 
