@@ -3,7 +3,7 @@ package storage
 import (
 	"fmt"
 	"payments/src/entities"
-	"payments/src/errors"
+	"time"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -54,6 +54,7 @@ func (repo sqlUserStorage) Create(payment entities.Payment) error {
 	}
 
 	outbox := entities.OutboxData{
+		CreatedAt: time.Now(),
 		PaymentID: payment.ID,
 		RouteID:   payment.RouteID,
 		Passenger: payment.Passenger,
@@ -70,8 +71,8 @@ func (repo sqlUserStorage) Create(payment entities.Payment) error {
 func (repo sqlUserStorage) PopPayment() (entities.OutboxData, error) {
 	var outboxDTO entities.OutboxData
 
-	if err := repo.db.Preload("Passenger").First(&outboxDTO).Error; err != nil {
-		return entities.OutboxData{}, errors.ErrStorageEmpty
+	if err := repo.db.Order("created_at").Preload("Passenger").First(&outboxDTO).Error; err != nil {
+		return entities.OutboxData{}, err
 	}
 
 	if err := repo.db.Delete(&outboxDTO).Error; err != nil {
@@ -82,11 +83,8 @@ func (repo sqlUserStorage) PopPayment() (entities.OutboxData, error) {
 }
 
 func (repo sqlUserStorage) PushBack(payment entities.OutboxData) error {
-	if err := repo.db.Create(&payment).Error; err != nil {
-		return err
-	}
-
-	return nil
+	payment.CreatedAt = time.Now()
+	return repo.db.Create(&payment).Error
 }
 
 func (repo sqlUserStorage) DropTables() error {
