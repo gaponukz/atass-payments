@@ -5,11 +5,14 @@ import (
 	"payments/src/entities"
 )
 
-type successfulEventNotifier struct{}
+type successfulEventNotifier struct {
+	LastMessage entities.OutboxData
+}
 
 type unsuccessfulEventNotifier struct{}
 
-func (s successfulEventNotifier) Notify(p entities.OutboxData) error {
+func (s *successfulEventNotifier) Notify(p entities.OutboxData) error {
+	s.LastMessage = p
 	return nil
 }
 
@@ -21,6 +24,6 @@ func NewUnsuccessfulEventNotifier() unsuccessfulEventNotifier {
 	return unsuccessfulEventNotifier{}
 }
 
-func NewSuccessfulEventNotifier() successfulEventNotifier {
-	return successfulEventNotifier{}
+func NewSuccessfulEventNotifier() *successfulEventNotifier {
+	return &successfulEventNotifier{}
 }

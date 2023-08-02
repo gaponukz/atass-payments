@@ -34,11 +34,12 @@ func main() {
 		panic(err.Error())
 	}
 
-	logger := logger.NewConsoleLogger()
-	loggeredPaymentsDB := outbox.NewStorageLoggerDecorator(paymentsDB, logger)
-	paymentService := usecase.NewPaymentService(loggeredPaymentsDB)
+	logging := logger.NewConsoleLogger()
+	loggeredRabbitMQNotifier := logger.NewLoggingNotifierDecorator(rabbitMQNotifier, logging)
+	loggeredPaymentsDB := logger.NewStorageLoggerDecorator(paymentsDB, logging)
+	paymentService := logger.NewlogPaymentServiceDecorator(usecase.NewPaymentService(loggeredPaymentsDB), logging)
 	controller := controller.NewController(paymentService)
-	sendEventsService := outbox.NewSendEventsService(loggeredPaymentsDB, rabbitMQNotifier)
+	sendEventsService := logger.NewLogSendEventsServiceDecorator(outbox.NewSendEventsService(loggeredPaymentsDB, loggeredRabbitMQNotifier), logging)
 
 	handler := http.NewServeMux()
 	handler.HandleFunc("/processPayment", controller.ProcessPayment)
