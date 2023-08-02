@@ -37,9 +37,9 @@ func main() {
 	logging := logger.NewConsoleLogger()
 	loggeredRabbitMQNotifier := logger.NewLoggingNotifierDecorator(rabbitMQNotifier, logging)
 	loggeredPaymentsDB := logger.NewStorageLoggerDecorator(paymentsDB, logging)
-	paymentService := usecase.NewPaymentService(loggeredPaymentsDB)
+	paymentService := logger.NewlogPaymentServiceDecorator(usecase.NewPaymentService(loggeredPaymentsDB), logging)
 	controller := controller.NewController(paymentService)
-	sendEventsService := outbox.NewSendEventsService(loggeredPaymentsDB, loggeredRabbitMQNotifier)
+	sendEventsService := logger.NewLogSendEventsServiceDecorator(outbox.NewSendEventsService(loggeredPaymentsDB, loggeredRabbitMQNotifier), logging)
 
 	handler := http.NewServeMux()
 	handler.HandleFunc("/processPayment", controller.ProcessPayment)
