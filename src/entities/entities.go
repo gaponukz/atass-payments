@@ -1,5 +1,7 @@
 package entities
 
+import "time"
+
 type RouteID string
 
 type Passenger struct {
@@ -20,6 +22,7 @@ type Payment struct {
 }
 
 type OutboxData struct {
+	CreatedAt   time.Time `json:"createdAt" gorm:"column:created_at;not null"`
 	PaymentID   string    `json:"paymentId" gorm:"primaryKey;not null;unique"`
 	RouteID     RouteID   `json:"routeId" gorm:"not null"`
 	PassengerID string    `json:"passengerId" gorm:"not null"`
