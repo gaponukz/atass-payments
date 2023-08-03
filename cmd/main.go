@@ -11,6 +11,7 @@ import (
 	"payments/src/settings"
 	"payments/src/storage"
 	"payments/src/usecase"
+	"time"
 )
 
 func main() {
@@ -45,8 +46,9 @@ func main() {
 	handler.HandleFunc("/processPayment", controller.ProcessPayment)
 
 	server := http.Server{
-		Addr:    ":9090",
-		Handler: handler,
+		Addr:              ":9090",
+		Handler:           handler,
+		ReadHeaderTimeout: 3 * time.Second,
 	}
 
 	go cdc_service.NewCDCservice(sendEventsService).Serve()
