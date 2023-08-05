@@ -40,14 +40,14 @@ func main() {
 	loggeredPaymentsDB := logger.NewStorageLoggerDecorator(paymentsDB, logging)
 	sendEventsService := logger.NewLogSendEventsServiceDecorator(outbox.NewSendEventsService(loggeredPaymentsDB, loggeredRabbitMQNotifier), logging)
 	paymentService := outbox.NewTriggerOutboxDecorator(logger.NewlogPaymentServiceDecorator(usecase.NewPaymentService(loggeredPaymentsDB), logging), sendEventsService)
-	controller := controller.NewController(paymentService)
+	contr := controller.NewController(paymentService)
 
 	handler := http.NewServeMux()
-	handler.HandleFunc("/processPayment", controller.ProcessPayment)
+	handler.HandleFunc("/processPayment", contr.ProcessPayment)
 
 	server := http.Server{
 		Addr:              ":9090",
-		Handler:           handler,
+		Handler:           controller.EnableCORS(handler),
 		ReadHeaderTimeout: 3 * time.Second,
 	}
 
