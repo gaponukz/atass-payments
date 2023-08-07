@@ -7,6 +7,7 @@ import (
 )
 
 type paymentService interface {
+	IsPaymentValid(dto.CratePaymentDTO) bool
 	OnSuccessfulPayment(dto.CratePaymentDTO) (entities.Payment, error)
 }
 
@@ -21,6 +22,12 @@ func NewController(paymentService paymentService) controller {
 func (c controller) ProcessPayment(responseWriter http.ResponseWriter, request *http.Request) {
 	newPayment, err := getCratePaymentDTO(request)
 	if err != nil {
+		responseWriter.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	isValid := c.paymentService.IsPaymentValid(newPayment)
+	if !isValid {
 		responseWriter.WriteHeader(http.StatusBadRequest)
 		return
 	}

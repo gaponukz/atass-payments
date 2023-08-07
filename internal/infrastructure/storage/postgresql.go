@@ -21,11 +21,11 @@ type PostgresCredentials struct {
 	Sslmode  string
 }
 
-type sqlUserStorage struct {
+type paymentsStorage struct {
 	db *gorm.DB
 }
 
-func NewPostgresUserStorage(c PostgresCredentials) (*sqlUserStorage, error) {
+func NewPostgresUserStorage(c PostgresCredentials) (*paymentsStorage, error) {
 	dsn := fmt.Sprintf(
 		"host=%s user=%s password=%s dbname=%s port=%s sslmode=%s",
 		c.Host, c.User, c.Password, c.Dbname, c.Port, c.Sslmode,
@@ -42,12 +42,12 @@ func NewPostgresUserStorage(c PostgresCredentials) (*sqlUserStorage, error) {
 		return nil, err
 	}
 
-	return &sqlUserStorage{
+	return &paymentsStorage{
 		db: db,
 	}, nil
 }
 
-func (repo sqlUserStorage) Create(payment entities.Payment) error {
+func (repo paymentsStorage) Create(payment entities.Payment) error {
 	payModel := paymentToModel(payment)
 
 	tx := repo.db.Begin()
@@ -72,7 +72,7 @@ func (repo sqlUserStorage) Create(payment entities.Payment) error {
 	return tx.Commit().Error
 }
 
-func (repo sqlUserStorage) PopPayment() (entities.OutboxData, error) {
+func (repo paymentsStorage) PopPayment() (entities.OutboxData, error) {
 	var outboxDTO outboxDataModel
 
 	if err := repo.db.Order("created_at").Preload("Passenger").First(&outboxDTO).Error; err != nil {
@@ -90,12 +90,12 @@ func (repo sqlUserStorage) PopPayment() (entities.OutboxData, error) {
 	return outboxDataFromModel(outboxDTO), nil
 }
 
-func (repo sqlUserStorage) PushBack(payment entities.OutboxData) error {
+func (repo paymentsStorage) PushBack(payment entities.OutboxData) error {
 	model := outboxDataToModel(payment)
 	model.CreatedAt = time.Now()
 	return repo.db.Create(&model).Error
 }
 
-func (repo sqlUserStorage) DropTables() error {
+func (repo paymentsStorage) DropTables() error {
 	return repo.db.Migrator().DropTable(&paymentModel{}, &outboxDataModel{})
 }
