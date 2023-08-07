@@ -4,6 +4,18 @@ on:
   push:
 
 jobs:
+  architecture:
+    name: Run all app architecture tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-go@v4
+        with:
+          go-version: '1.20'
+          cache: false
+      - name: Run architecture tests
+        run: go test ./tests/architecture
+
   lint:
     name: Lint
     runs-on: ubuntu-latest
