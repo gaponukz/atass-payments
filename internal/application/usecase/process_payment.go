@@ -19,6 +19,34 @@ func NewPaymentService(db createAbleStorages) service {
 	return service{db: db}
 }
 
+func (s service) IsPaymentValid(info dto.CratePaymentDTO) bool {
+	if info.Amount < 0 {
+		return false
+	}
+
+	if info.RouteID == "" {
+		return false
+	}
+
+	if info.Passenger.FullName == "" {
+		return false
+	}
+
+	if info.Passenger.MoveFromID == "" {
+		return false
+	}
+
+	if info.Passenger.MoveToID == "" {
+		return false
+	}
+
+	if info.Passenger.PhoneNumber == "" {
+		return false
+	}
+
+	return true
+}
+
 func (s service) OnSuccessfulPayment(info dto.CratePaymentDTO) (entities.Payment, error) {
 	if info.Passenger.ID == "" {
 		info.Passenger.ID = uuid.New().String()
