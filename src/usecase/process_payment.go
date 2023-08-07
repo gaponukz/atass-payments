@@ -20,6 +20,10 @@ func NewPaymentService(db createAbleStorages) service {
 }
 
 func (s service) OnSuccessfulPayment(info dto.CratePaymentDTO) (entities.Payment, error) {
+	if info.Passenger.ID == "" {
+		info.Passenger.ID = uuid.New().String()
+	}
+
 	payment := entities.Payment{
 		ID:        uuid.New().String(),
 		Amount:    info.Amount,

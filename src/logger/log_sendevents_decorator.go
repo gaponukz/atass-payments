@@ -1,6 +1,9 @@
 package logger
 
-import "fmt"
+import (
+	"fmt"
+	"payments/src/errors"
+)
 
 type sendEventsService interface {
 	SendNewEvent() error
@@ -18,6 +21,10 @@ func NewLogSendEventsServiceDecorator(s sendEventsService, l logger) logSendEven
 func (s logSendEventsService) SendNewEvent() error {
 	err := s.s.SendNewEvent()
 	if err != nil {
+		if err == errors.ErrStorageEmpty {
+			return nil
+		}
+
 		s.l.Error(fmt.Sprintf("Can not send new event: %v", err))
 	}
 
