@@ -1,8 +1,8 @@
 package usecase
 
 import (
-	"payments/src/dto"
-	"payments/src/entities"
+	"payments/internal/application/dto"
+	"payments/internal/domain/entities"
 
 	"github.com/google/uuid"
 )

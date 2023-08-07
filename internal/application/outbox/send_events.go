@@ -1,8 +1,6 @@
 package outbox
 
-import (
-	"payments/src/entities"
-)
+import "payments/internal/domain/entities"
 
 type popAbleStorage interface {
 	PopPayment() (entities.OutboxData, error)

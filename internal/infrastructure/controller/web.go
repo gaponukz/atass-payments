@@ -2,8 +2,8 @@ package controller
 
 import (
 	"net/http"
-	"payments/src/dto"
-	"payments/src/entities"
+	"payments/internal/application/dto"
+	"payments/internal/domain/entities"
 )
 
 type paymentService interface {

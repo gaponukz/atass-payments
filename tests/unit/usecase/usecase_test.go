@@ -1,9 +1,9 @@
 package usecase
 
 import (
-	"payments/src/dto"
-	"payments/src/entities"
-	"payments/src/usecase"
+	"payments/internal/application/dto"
+	"payments/internal/application/usecase"
+	"payments/internal/domain/entities"
 	"payments/tests/mocks"
 	"testing"
 )

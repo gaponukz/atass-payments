@@ -1,6 +1,6 @@
 package dto
 
-import "payments/src/entities"
+import "payments/internal/domain/entities"
 
 type CratePaymentDTO struct {
 	Amount    float64            `json:"amount"`

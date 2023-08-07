@@ -2,8 +2,8 @@ package storage
 
 import (
 	"fmt"
-	"payments/src/entities"
-	"payments/src/errors"
+	"payments/internal/domain/entities"
+	"payments/internal/domain/errors"
 	"strings"
 	"time"
 
@@ -37,7 +37,7 @@ func NewPostgresUserStorage(c PostgresCredentials) (*sqlUserStorage, error) {
 		return nil, err
 	}
 
-	err = db.AutoMigrate(&entities.Payment{}, &entities.OutboxData{})
+	err = db.AutoMigrate(&paymentModel{}, &outboxDataModel{})
 	if err != nil {
 		return nil, err
 	}
@@ -48,18 +48,20 @@ func NewPostgresUserStorage(c PostgresCredentials) (*sqlUserStorage, error) {
 }
 
 func (repo sqlUserStorage) Create(payment entities.Payment) error {
-	tx := repo.db.Begin()
+	payModel := paymentToModel(payment)
 
-	if err := tx.Create(&payment).Error; err != nil {
+	tx := repo.db.Begin()
+	if err := tx.Create(&payModel).Error; err != nil {
 		tx.Rollback()
 		return err
 	}
 
-	outbox := entities.OutboxData{
-		CreatedAt: time.Now(),
-		PaymentID: payment.ID,
-		RouteID:   payment.RouteID,
-		Passenger: payment.Passenger,
+	outbox := outboxDataModel{
+		CreatedAt:   time.Now(),
+		PaymentID:   payment.ID,
+		RouteID:     payment.RouteID,
+		PassengerID: payment.Passenger.ID,
+		Passenger:   passengerToModel(payment.Passenger),
 	}
 
 	if err := tx.Create(&outbox).Error; err != nil {
@@ -71,7 +73,7 @@ func (repo sqlUserStorage) Create(payment entities.Payment) error {
 }
 
 func (repo sqlUserStorage) PopPayment() (entities.OutboxData, error) {
-	var outboxDTO entities.OutboxData
+	var outboxDTO outboxDataModel
 
 	if err := repo.db.Order("created_at").Preload("Passenger").First(&outboxDTO).Error; err != nil {
 		if strings.Contains(err.Error(), "not found") {
@@ -85,14 +87,15 @@ func (repo sqlUserStorage) PopPayment() (entities.OutboxData, error) {
 		return entities.OutboxData{}, err
 	}
 
-	return outboxDTO, nil
+	return outboxDataFromModel(outboxDTO), nil
 }
 
 func (repo sqlUserStorage) PushBack(payment entities.OutboxData) error {
-	payment.CreatedAt = time.Now()
-	return repo.db.Create(&payment).Error
+	model := outboxDataToModel(payment)
+	model.CreatedAt = time.Now()
+	return repo.db.Create(&model).Error
 }
 
 func (repo sqlUserStorage) DropTables() error {
-	return repo.db.Migrator().DropTable(&entities.Payment{}, &entities.OutboxData{})
+	return repo.db.Migrator().DropTable(&paymentModel{}, &outboxDataModel{})
 }

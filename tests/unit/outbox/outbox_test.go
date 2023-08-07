@@ -1,9 +1,9 @@
 package outbox
 
 import (
-	"payments/src/entities"
-	"payments/src/errors"
-	"payments/src/outbox"
+	"payments/internal/application/outbox"
+	"payments/internal/domain/entities"
+	"payments/internal/domain/errors"
 	"payments/tests/mocks"
 	"testing"
 )

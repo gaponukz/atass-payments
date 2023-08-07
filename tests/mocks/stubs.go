@@ -2,7 +2,7 @@ package mocks
 
 import (
 	"fmt"
-	"payments/src/entities"
+	"payments/internal/domain/entities"
 )
 
 type successfulEventNotifier struct {
