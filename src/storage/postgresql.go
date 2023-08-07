@@ -3,6 +3,8 @@ package storage
 import (
 	"fmt"
 	"payments/src/entities"
+	"payments/src/errors"
+	"strings"
 	"time"
 
 	"gorm.io/driver/postgres"
@@ -72,6 +74,10 @@ func (repo sqlUserStorage) PopPayment() (entities.OutboxData, error) {
 	var outboxDTO entities.OutboxData
 
 	if err := repo.db.Order("created_at").Preload("Passenger").First(&outboxDTO).Error; err != nil {
+		if strings.Contains(err.Error(), "not found") {
+			return entities.OutboxData{}, errors.ErrStorageEmpty
+		}
+
 		return entities.OutboxData{}, err
 	}
 
