@@ -32,6 +32,7 @@ jobs:
           only-new-issues: true
 
   unit-test:
+    needs: [architecture, lint]
     name: Unit Test
     runs-on: ubuntu-latest
     steps:
