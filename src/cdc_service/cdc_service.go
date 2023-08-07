@@ -1,6 +1,7 @@
 package cdc_service
 
 import (
+	"payments/src/errors"
 	"time"
 )
 
@@ -19,8 +20,15 @@ func NewCDCservice(s sendEventsService) cdcService {
 func (c cdcService) Serve() {
 	for {
 		err := c.s.SendNewEvent()
-		if err != nil {
-			time.Sleep(time.Second * 10)
+		if err == nil {
+			continue
 		}
+
+		if err == errors.ErrStorageEmpty {
+			time.Sleep(time.Second * 5)
+			continue
+		}
+
+		time.Sleep(time.Second * 3)
 	}
 }
