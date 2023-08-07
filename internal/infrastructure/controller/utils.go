@@ -3,7 +3,7 @@ package controller
 import (
 	"encoding/json"
 	"net/http"
-	"payments/src/dto"
+	"payments/internal/application/dto"
 )
 
 func getCratePaymentDTO(request *http.Request) (dto.CratePaymentDTO, error) {

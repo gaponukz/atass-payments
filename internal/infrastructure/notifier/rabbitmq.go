@@ -3,7 +3,7 @@ package notifier
 import (
 	"context"
 	"encoding/json"
-	"payments/src/entities"
+	"payments/internal/domain/entities"
 	"time"
 
 	amqp "github.com/rabbitmq/amqp091-go"

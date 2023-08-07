@@ -3,14 +3,15 @@ package main
 import (
 	"fmt"
 	"net/http"
-	"payments/src/cdc_service"
-	"payments/src/controller"
-	"payments/src/logger"
-	"payments/src/notifier"
-	"payments/src/outbox"
-	"payments/src/settings"
-	"payments/src/storage"
-	"payments/src/usecase"
+	"payments/internal/application/cdc_service"
+	"payments/internal/application/outbox"
+	"payments/internal/application/usecase"
+	"payments/internal/infrastructure/controller"
+	"payments/internal/infrastructure/logger"
+	"payments/internal/infrastructure/notifier"
+	"payments/internal/infrastructure/settings"
+	"payments/internal/infrastructure/storage"
+
 	"time"
 )
 

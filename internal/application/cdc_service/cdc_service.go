@@ -1,7 +1,7 @@
 package cdc_service
 
 import (
-	"payments/src/errors"
+	"payments/internal/domain/errors"
 	"time"
 )
 

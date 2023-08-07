@@ -2,7 +2,7 @@ package logger
 
 import (
 	"fmt"
-	"payments/src/entities"
+	"payments/internal/domain/entities"
 )
 
 type notifier interface {

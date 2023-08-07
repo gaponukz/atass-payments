@@ -2,8 +2,8 @@ package storage
 
 import (
 	"fmt"
-	"payments/src/entities"
-	"payments/src/errors"
+	"payments/internal/domain/entities"
+	"payments/internal/domain/errors"
 	"strings"
 	"time"
 

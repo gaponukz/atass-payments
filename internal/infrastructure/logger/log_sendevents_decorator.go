@@ -2,7 +2,7 @@ package logger
 
 import (
 	"fmt"
-	"payments/src/errors"
+	"payments/internal/domain/errors"
 )
 
 type sendEventsService interface {
