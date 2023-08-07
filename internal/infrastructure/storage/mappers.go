@@ -37,15 +37,6 @@ func paymentToModel(payment entities.Payment) paymentModel {
 	}
 }
 
-func paymentFromModel(payment paymentModel) entities.Payment {
-	return entities.Payment{
-		ID:        payment.ID,
-		Amount:    payment.Amount,
-		RouteID:   payment.RouteID,
-		Passenger: passengerFromModel(payment.Passenger),
-	}
-}
-
 func outboxDataToModel(outboxData entities.OutboxData) outboxDataModel {
 	return outboxDataModel{
 		CreatedAt:   time.Now(),
