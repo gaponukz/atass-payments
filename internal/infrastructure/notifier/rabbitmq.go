@@ -42,19 +42,6 @@ func NewRabbitMQNotifier(url string) (*rabbitMQNotifier, error) {
 	}
 
 	_, err = ch.QueueDeclare(
-		"passenger_payments", // name
-		false,                // durable
-		false,                // delete when unused
-		false,                // exclusive
-		false,                // no-wait
-		nil,                  // arguments
-	)
-	if err != nil {
-		_ = ch.Close()
-		_ = conn.Close()
-		return nil, err
-	}
-	_, err = ch.QueueDeclare(
 		"route_payments", // name
 		false,            // durable
 		false,            // delete when unused
