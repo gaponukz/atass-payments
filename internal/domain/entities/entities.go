@@ -9,6 +9,7 @@ type Passenger struct {
 	PhoneNumber string `json:"phoneNumber"`
 	MoveFromID  string `json:"movingFromId"`
 	MoveToID    string `json:"movingTowardsId"`
+	IsAnonymous bool   `json:"isAnonymous"`
 }
 
 type Payment struct {

@@ -24,6 +24,7 @@ func passengerFromModel(passenger passengerModel) entities.Passenger {
 		PhoneNumber: passenger.PhoneNumber,
 		MoveFromID:  passenger.MoveFromID,
 		MoveToID:    passenger.MoveToID,
+		IsAnonymous: passenger.IsAnonymous,
 	}
 }
 

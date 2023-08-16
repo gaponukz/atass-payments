@@ -12,6 +12,7 @@ type passengerModel struct {
 	PhoneNumber string `gorm:"not null"`
 	MoveFromID  string `gorm:"not null"`
 	MoveToID    string `gorm:"not null"`
+	IsAnonymous bool   `gorm:"not null"`
 }
 
 type paymentModel struct {
