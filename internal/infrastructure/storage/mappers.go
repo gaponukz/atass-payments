@@ -13,6 +13,7 @@ func passengerToModel(passenger entities.Passenger) passengerModel {
 		PhoneNumber: passenger.PhoneNumber,
 		MoveFromID:  passenger.MoveFromID,
 		MoveToID:    passenger.MoveToID,
+		IsAnonymous: passenger.IsAnonymous,
 	}
 }
 
