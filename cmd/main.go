@@ -44,7 +44,7 @@ func main() {
 	contr := controller.NewController(paymentService)
 
 	handler := http.NewServeMux()
-	handler.HandleFunc("/processPayment", contr.ProcessPayment)
+	handler.HandleFunc("/api/payments/processPayment", contr.ProcessPayment)
 
 	server := http.Server{
 		Addr:              ":9090",
