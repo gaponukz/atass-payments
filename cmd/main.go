@@ -17,12 +17,7 @@ import (
 
 func main() {
 	config := settings.NewDotEnvSettings().Load()
-	rabbitMQNotifier, err := notifier.NewRabbitMQNotifier(config.RabbitmqUrl)
-	if err != nil {
-		panic(err.Error())
-	}
-
-	defer rabbitMQNotifier.Close()
+	httpNotifier := notifier.NewHttpNotifier(config.ProcessPaymentUrl)
 
 	paymentsDB, err := storage.NewPostgresUserStorage(storage.PostgresCredentials{
 		Host:     config.PostgresHost,
@@ -37,9 +32,9 @@ func main() {
 	}
 
 	logging := logger.NewConsoleLogger()
-	loggeredRabbitMQNotifier := logger.NewLoggingNotifierDecorator(rabbitMQNotifier, logging)
+	loggeredHttpNotifier := logger.NewLoggingNotifierDecorator(httpNotifier, logging)
 	loggeredPaymentsDB := logger.NewStorageLoggerDecorator(paymentsDB, logging)
-	sendEventsService := logger.NewLogSendEventsServiceDecorator(outbox.NewSendEventsService(loggeredPaymentsDB, loggeredRabbitMQNotifier), logging)
+	sendEventsService := logger.NewLogSendEventsServiceDecorator(outbox.NewSendEventsService(loggeredPaymentsDB, loggeredHttpNotifier), logging)
 	paymentService := logger.NewlogPaymentServiceDecorator(usecase.NewPaymentService(loggeredPaymentsDB), logging)
 	contr := controller.NewController(paymentService)
 
@@ -47,7 +42,7 @@ func main() {
 	handler.HandleFunc("/api/payments/processPayment", contr.ProcessPayment)
 
 	server := http.Server{
-		Addr:              ":9090",
+		Addr:              fmt.Sprintf(":%s", config.Port),
 		Handler:           controller.EnableCORS(handler),
 		ReadHeaderTimeout: 3 * time.Second,
 	}
