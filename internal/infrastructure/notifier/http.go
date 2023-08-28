@@ -3,6 +3,7 @@ package notifier
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"payments/internal/domain/entities"
 )
@@ -26,6 +27,10 @@ func (r httpNotifier) Notify(payment entities.OutboxData) error {
 		return err
 	}
 	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("Server send %d status code", resp.StatusCode)
+	}
 
 	return nil
 }
