@@ -90,6 +90,30 @@ func (repo paymentsStorage) PopPayment() (entities.OutboxData, error) {
 	return outboxDataFromModel(outboxDTO), nil
 }
 
+func (repo paymentsStorage) _PopPayment(sendPayment func(entities.OutboxData) error) error {
+	tx := repo.db.Begin()
+	var outboxDTO outboxDataModel
+
+	if err := repo.db.Order("created_at").Preload("Passenger").First(&outboxDTO).Error; err != nil {
+		if strings.Contains(err.Error(), "not found") {
+			return errors.ErrStorageEmpty
+		}
+
+		return err
+	}
+
+	if err := repo.db.Delete(&outboxDTO).Error; err != nil {
+		return err
+	}
+
+	err := sendPayment(outboxDataFromModel(outboxDTO))
+	if err != nil {
+		tx.Rollback()
+	}
+
+	return tx.Commit().Error
+}
+
 func (repo paymentsStorage) PushBack(payment entities.OutboxData) error {
 	model := outboxDataToModel(payment)
 	model.CreatedAt = time.Now()
