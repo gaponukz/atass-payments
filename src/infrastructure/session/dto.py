@@ -1,3 +1,4 @@
+import typing
 import dataclasses
 
 
@@ -29,5 +30,21 @@ class AuthorizeDTO:
 @dataclasses.dataclass
 class CreatePaymentDTO:
     amount: int
+    title: str
+    description: str
+    short_description: str
     external_id: str
     merchant_config_id: str
+    config_id: str
+    options: dict | None = None
+    params: dict | None = None
+    hold: bool = False
+    lang: typing.Literal["UK", "RU", "EN"] = "UK"
+
+
+@dataclasses.dataclass
+class CreatePaymentResponse:
+    id: str
+    url: str
+    short_url: str
+    signature: str

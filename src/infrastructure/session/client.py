@@ -20,6 +20,23 @@ class HttpPaymentSession:
 
         self._authorize_session()
 
+    def create_payment(self, data: dto.CreatePaymentDTO) -> dto.CreatePaymentResponse:
+        json_data = self._factory.dump(data)
+        response = self._make_request("POST", "/frames/links/pga", json_data)
+
+        return self._factory.load(response, dto.CreatePaymentResponse)
+
+    def _make_request(self, method: str, url: str, data: object) -> dict:
+        return self._session.request(
+            method,
+            f"{self._url}{url}",
+            json=data,
+            headers={
+                "Authorization": f"Bearer {self._access_token}",
+                "Content-Type": "application/json",
+            },
+        ).json()
+
     def _authorize_session(self):
         body = dto.AuthorizeDTO(
             params=dto.AuthorizeInnerDTO(
