@@ -1,4 +1,3 @@
-import enum
 import typing
 import dataclasses
 
@@ -71,5 +70,5 @@ class CreatePaymentResponse:
 @dataclasses.dataclass
 class PaymentStatusDTO:
     id: str
-    status: str
+    status: PaymentStatus
     external_id: str
