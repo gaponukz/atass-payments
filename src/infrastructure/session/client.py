@@ -26,7 +26,12 @@ class HttpPaymentSession:
 
         return self._factory.load(response, dto.CreatePaymentResponse)
 
-    def _make_request(self, method: str, url: str, data: object) -> dict:
+    def get_payment_status(self, payment_id: str) -> dto.PaymentStatusDTO:
+        response = self._make_request("GET", f"/frames/links/pga/{payment_id}")
+
+        return self._factory.load(response, dto.PaymentStatusDTO)
+
+    def _make_request(self, method: str, url: str, data: object = None) -> dict:
         return self._session.request(
             method,
             f"{self._url}{url}",
@@ -52,17 +57,13 @@ class HttpPaymentSession:
         self._access_token = output.data.access_token
         self._refresh_token = output.data.refresh_token
 
-        proccess = multiprocessing.Process(
-            target=self._start_refresh_daemon, args=(output.data.expires_in,)
-        )
-        proccess.start()
+        # proccess = multiprocessing.Process(
+        #     target=self._start_refresh_daemon, args=(output.data.expires_in,)
+        # )
+        # proccess.start()
 
-        self._refresh_daemon_pid = proccess.pid
+        # self._refresh_daemon_pid = proccess.pid
 
     def _start_refresh_daemon(self, seconds_to_wait: int):
         time.sleep(seconds_to_wait - 2)
         # TODO: make request to refresh
-
-    def _create_payment(self, amount_coins: int):
-        transaction_id = str(uuid.uuid4())
-        response = self._session.post(f"{self._url}/pga/transactions")

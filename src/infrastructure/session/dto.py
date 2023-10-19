@@ -1,5 +1,10 @@
+import enum
 import typing
 import dataclasses
+
+PaymentStatus = typing.Literal[
+    "ACTIVE", "EXPIRED", "USED", "DELETED", "FAILED", "PENDING"
+]
 
 
 @dataclasses.dataclass
@@ -28,6 +33,20 @@ class AuthorizeDTO:
 
 
 @dataclasses.dataclass
+class CreatePaymenOptionsBackUrls:
+    success: str
+    error: str
+    cancel: str
+
+
+@dataclasses.dataclass
+class CreatePaymenOptions:
+    ttl: int
+    create_short_url: bool
+    backurl: CreatePaymenOptionsBackUrls
+
+
+@dataclasses.dataclass
 class CreatePaymentDTO:
     amount: int
     title: str
@@ -36,8 +55,7 @@ class CreatePaymentDTO:
     external_id: str
     merchant_config_id: str
     config_id: str
-    options: dict | None = None
-    params: dict | None = None
+    options: CreatePaymenOptions
     hold: bool = False
     lang: typing.Literal["UK", "RU", "EN"] = "UK"
 
@@ -46,5 +64,12 @@ class CreatePaymentDTO:
 class CreatePaymentResponse:
     id: str
     url: str
-    short_url: str
     signature: str
+    short_url: str | None = None
+
+
+@dataclasses.dataclass
+class PaymentStatusDTO:
+    id: str
+    status: str
+    external_id: str
