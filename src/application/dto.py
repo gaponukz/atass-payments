@@ -1,13 +1,30 @@
-import typing
 import dataclasses
-
-PaymentStatus = typing.Literal[
-    "ACTIVE", "EXPIRED", "USED", "DELETED", "FAILED", "PENDING"
-]
+from src.domain import entities
 
 
 @dataclasses.dataclass
 class CreatePaymentDTO:
+    amount: float
+    route_id: str
+    passenger: entities.Passenger
+
+
+@dataclasses.dataclass
+class SavePaymentDTO:
+    external_id: str
+    payment: entities.Payment
+
+
+@dataclasses.dataclass
+class TextPresentaionOnPaymentCreationDTO:
+    title: str
+    description: str
+    short_description: str
+    after_payment_url: str
+
+
+@dataclasses.dataclass
+class CreateExternalPaymentDTO:
     id: str
     ttl_seconds: int
     after_payment_url: str
@@ -18,6 +35,6 @@ class CreatePaymentDTO:
 
 
 @dataclasses.dataclass
-class PaymentCreatedDTO:
+class ExternalPaymentCreatedDTO:
     id: str
     url: str

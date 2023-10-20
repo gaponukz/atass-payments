@@ -4,7 +4,8 @@ import dataclasses
 import multiprocessing
 import dataclass_factory
 from src.infrastructure.session import dto
-from src.application import dto as application_dto
+from src.application.dto import CreateExternalPaymentDTO
+from src.application.dto import ExternalPaymentCreatedDTO
 
 
 @dataclasses.dataclass
@@ -30,8 +31,8 @@ class HttpPaymentSession:
         self._authorize_session()
 
     def create_payment(
-        self, data: application_dto.CreatePaymentDTO
-    ) -> application_dto.PaymentCreatedDTO:
+        self, data: CreateExternalPaymentDTO
+    ) -> ExternalPaymentCreatedDTO:
         json_data = self._factory.dump(
             dto.CreatePaymentDTO(
                 amount=data.amount,
@@ -55,7 +56,7 @@ class HttpPaymentSession:
         response = self._make_request("POST", "/frames/links/pga", json_data)
         response = self._factory.load(response, dto.CreatePaymentResponse)
 
-        return application_dto.PaymentCreatedDTO(id=response.id, url=response.url)
+        return ExternalPaymentCreatedDTO(id=response.id, url=response.url)
 
     def get_payment_status(self, payment_id: str) -> dto.PaymentStatus:
         response = self._make_request("GET", f"/frames/links/pga/{payment_id}")

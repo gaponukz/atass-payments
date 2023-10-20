@@ -15,7 +15,7 @@ class Passenger:
 @dataclasses.dataclass
 class Payment:
     id: str
-    amount: float
+    amount: int
     route_id: str
     passenger: Passenger
 
