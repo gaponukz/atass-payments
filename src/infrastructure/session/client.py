@@ -1,7 +1,7 @@
 import time
 import requests
 import dataclasses
-import multiprocessing
+import threading
 import dataclass_factory
 from src.infrastructure.session import dto
 from src.application.dto import CreateExternalPaymentDTO
@@ -26,10 +26,8 @@ class HttpPaymentSession:
         self._factory = dataclass_factory.Factory()
 
         self._access_token: str | None = None
-        self._refresh_token: str | None = None
-        self._refresh_daemon_pid: int | None = None
 
-        self._authorize_session()
+        threading.Thread(target=self._authorize_session).start()
 
     def create_payment(
         self, data: CreateExternalPaymentDTO
@@ -87,7 +85,7 @@ class HttpPaymentSession:
             },
         ).json()
 
-    def _authorize_session(self):
+    def _authorize_session(self, time_to_wait: int = 0):
         body = dto.AuthorizeDTO(
             params=dto.AuthorizeInnerDTO(
                 login=self._creds.login,
@@ -95,6 +93,8 @@ class HttpPaymentSession:
                 client="transacter",
             )
         )
+
+        time.sleep(time_to_wait)
 
         response = self._session.post(
             f"{self._url}/auth/token", json=self._factory.dump(body)
@@ -104,13 +104,5 @@ class HttpPaymentSession:
         self._access_token = output.data.access_token
         self._refresh_token = output.data.refresh_token
 
-        # proccess = multiprocessing.Process(
-        #     target=self._start_refresh_daemon, args=(output.data.expires_in,)
-        # )
-        # proccess.start()
-
-        # self._refresh_daemon_pid = proccess.pid
-
-    def _start_refresh_daemon(self, seconds_to_wait: int):
-        time.sleep(seconds_to_wait - 2)
-        # TODO: make request to refresh
+        print(f"_authorize_session: new tocken after {output.data.expires_in} seconds")
+        self._authorize_session(output.data.expires_in - 2)

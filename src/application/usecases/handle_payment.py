@@ -31,7 +31,6 @@ class HandlePaymentUseCase:
     def _handle(self, payment_id: str, retries: int, wait_before_check: int):
         for _ in range(retries):
             status = self._api.get_payment_status(payment_id)
-            print(f"got {status} status")
 
             if status in [dto.PaymentStatus.DONE, dto.PaymentStatus.NOT_EXIST]:
                 self._storage.set_status(payment_id, status)
