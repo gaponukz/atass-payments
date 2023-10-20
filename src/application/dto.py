@@ -1,5 +1,12 @@
+import enum
 import dataclasses
 from src.domain import entities
+
+
+class PaymentStatus(enum.IntEnum):
+    EXIST = 1
+    DONE = 2
+    NOT_EXIST = 3
 
 
 @dataclasses.dataclass

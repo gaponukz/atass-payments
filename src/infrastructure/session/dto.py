@@ -1,7 +1,7 @@
 import typing
 import dataclasses
 
-PaymentStatus = typing.Literal[
+ApiPaymentStatus = typing.Literal[
     "ACTIVE", "EXPIRED", "USED", "DELETED", "FAILED", "PENDING"
 ]
 
@@ -70,5 +70,5 @@ class CreatePaymentResponse:
 @dataclasses.dataclass
 class PaymentStatusDTO:
     id: str
-    status: PaymentStatus
+    status: ApiPaymentStatus
     external_id: str

@@ -6,6 +6,7 @@ import dataclass_factory
 from src.infrastructure.session import dto
 from src.application.dto import CreateExternalPaymentDTO
 from src.application.dto import ExternalPaymentCreatedDTO
+from src.application.dto import PaymentStatus
 
 
 @dataclasses.dataclass
@@ -58,11 +59,22 @@ class HttpPaymentSession:
 
         return ExternalPaymentCreatedDTO(id=response.id, url=response.url)
 
-    def get_payment_status(self, payment_id: str) -> dto.PaymentStatus:
+    def get_payment_status(self, payment_id: str) -> PaymentStatus:
         response = self._make_request("GET", f"/frames/links/pga/{payment_id}")
         data = self._factory.load(response, dto.PaymentStatusDTO)
 
-        return data.status
+        return self._map_payment_status(data.status)
+
+    def _map_payment_status(
+        self, payment_status: dto.ApiPaymentStatus
+    ) -> PaymentStatus:
+        if payment_status in ["ACTIVE", "PENDING"]:
+            return PaymentStatus.EXIST
+
+        if payment_status == "USED":
+            return PaymentStatus.DONE
+
+        return PaymentStatus.NOT_EXIST
 
     def _make_request(self, method: str, path: str, data: object = None) -> dict:
         return self._session.request(
