@@ -55,9 +55,9 @@ class HttpPaymentSession:
             )
         )
         response = self._make_request("POST", "/frames/links/pga", json_data)
-        response = self._factory.load(response, dto.CreatePaymentResponse)
+        created = self._factory.load(response, dto.CreatePaymentResponse)
 
-        return ExternalPaymentCreatedDTO(id=response.id, url=response.url)
+        return ExternalPaymentCreatedDTO(id=created.id, url=created.url)
 
     def get_payment_status(self, payment_id: str) -> PaymentStatus:
         response = self._make_request("GET", f"/frames/links/pga/{payment_id}")

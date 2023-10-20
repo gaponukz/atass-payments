@@ -17,6 +17,12 @@ class CreatePaymentDTO:
 
 
 @dataclasses.dataclass
+class PaymentCreatedDTO:
+    id: str
+    url: str
+
+
+@dataclasses.dataclass
 class SavePaymentDTO:
     external_id: str
     payment: entities.Payment

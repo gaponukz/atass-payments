@@ -34,15 +34,16 @@ class CreatePaymentUseCase:
         self._api = api
         self._presentation = presentation
 
-    def create_payment(self, data: dto.CreatePaymentDTO) -> str:
+    def create_payment(self, data: dto.CreatePaymentDTO) -> dto.PaymentCreatedDTO:
         payment_id = str(uuid.uuid4())
+        coins_amount = self._convert_to_coins(data.amount)
         presentation = self._presentation.get_text(data)
 
         created = self._api.create_payment(
             dto.CreateExternalPaymentDTO(
                 id=payment_id,
-                amount=data.amount,
-                ttl_seconds=300,
+                amount=coins_amount,
+                ttl_seconds=600,
                 after_payment_url=presentation.after_payment_url,
                 title=presentation.title,
                 description=presentation.description,
@@ -55,11 +56,14 @@ class CreatePaymentUseCase:
                 external_id=created.id,
                 payment=entities.Payment(
                     id=payment_id,
-                    amount=data.amount,
+                    amount=coins_amount,
                     route_id=data.route_id,
                     passenger=data.passenger,
                 ),
             )
         )
 
-        return created.url
+        return dto.PaymentCreatedDTO(id=created.id, url=created.url)
+
+    def _convert_to_coins(self, amount: float) -> int:
+        return int(amount * 100)
