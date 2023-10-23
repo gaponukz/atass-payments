@@ -1,5 +1,6 @@
 import time
 import typing
+import threading
 from src.application import dto
 
 
@@ -8,6 +9,9 @@ class PaymentRepository(typing.Protocol):
         ...
 
     def submit_payment(self, payment_id: str):
+        ...
+
+    def get_unprocessed_payments(self) -> list[str]:
         ...
 
 
@@ -20,6 +24,10 @@ class HandlePaymentUseCase:
     def __init__(self, storage: PaymentRepository, api: PaymentExternalAPI):
         self._storage = storage
         self._api = api
+
+    def handle_unprocessed(self):
+        for payment_id in self._storage.get_unprocessed_payments():
+            threading.Thread(target=self.handle, args=(payment_id, 5, 8)).start()
 
     def handle(self, payment_id: str, retries: int, wait_before_check: int):
         try:

@@ -1,3 +1,4 @@
+import time
 import pytest
 import dataclasses
 from src.application import dto
@@ -24,9 +25,14 @@ class PaymentRepositoryMock:
     def submit_payment(self, payment_id: str):
         self.payments[payment_id].is_submitted = True
 
+    def get_unprocessed_payments(self) -> list[str]:
+        return [
+            key for key in list(self.payments) if not self.payments[key].is_submitted
+        ]
+
 
 class PaymentExternalAPIMock:
-    def __init__(self, history: list[dto.PaymentStatus], raise_error=False):
+    def __init__(self, history: dict[str, list[dto.PaymentStatus]], raise_error=False):
         self.history = history
         self._raise_error = raise_error
 
@@ -34,13 +40,19 @@ class PaymentExternalAPIMock:
         if self._raise_error:
             raise ValueError("got unexpected exception")
 
-        return self.history.pop(0)
+        return self.history[payment_id].pop(0)
 
 
 def test_hanlde_succeed():
     db = PaymentRepositoryMock()
     api = PaymentExternalAPIMock(
-        [dto.PaymentStatus.EXIST, dto.PaymentStatus.EXIST, dto.PaymentStatus.DONE]
+        {
+            "1": [
+                dto.PaymentStatus.EXIST,
+                dto.PaymentStatus.EXIST,
+                dto.PaymentStatus.DONE,
+            ]
+        }
     )
     service = HandlePaymentUseCase(db, api)
 
@@ -52,7 +64,7 @@ def test_hanlde_succeed():
 
 def test_payment_already_done():
     db = PaymentRepositoryMock()
-    api = PaymentExternalAPIMock([dto.PaymentStatus.DONE])
+    api = PaymentExternalAPIMock({"2": [dto.PaymentStatus.DONE]})
     service = HandlePaymentUseCase(db, api)
 
     service.handle("2", 1, 0)
@@ -63,7 +75,7 @@ def test_payment_already_done():
 
 def test_payment_not_exist():
     db = PaymentRepositoryMock()
-    api = PaymentExternalAPIMock([dto.PaymentStatus.NOT_EXIST])
+    api = PaymentExternalAPIMock({"1": [dto.PaymentStatus.NOT_EXIST]})
     service = HandlePaymentUseCase(db, api)
 
     service.handle("1", 1, 0)
@@ -74,10 +86,29 @@ def test_payment_not_exist():
 
 def test_failure_handle():
     db = PaymentRepositoryMock()
-    api = PaymentExternalAPIMock([dto.PaymentStatus.EXIST], True)
+    api = PaymentExternalAPIMock({"3": [dto.PaymentStatus.EXIST]}, True)
     service = HandlePaymentUseCase(db, api)
 
     with pytest.raises(ValueError):
         service.handle("3", 1, 0)
 
     assert db.payments["3"].is_submitted == True
+
+
+def test_handle_unprocessed():
+    db = PaymentRepositoryMock()
+    api = PaymentExternalAPIMock(
+        {
+            "1": [dto.PaymentStatus.NOT_EXIST],
+            "2": [dto.PaymentStatus.DONE],
+            "3": [dto.PaymentStatus.EXIST, dto.PaymentStatus.DONE],
+        }
+    )
+
+    service = HandlePaymentUseCase(db, api)
+    service.handle_unprocessed()
+
+    time.sleep(10)
+
+    for _, value in db.payments.items():
+        assert value.is_submitted
