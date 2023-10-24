@@ -100,11 +100,8 @@ class HttpPaymentSession:
             f"{self._url}/auth/token", json=self._factory.dump(body)
         )
 
-        print(f"body: {response.json()}")
-
         output = self._factory.load(response.json(), dto.GetTokensDTO)
         self._access_token = output.data.access_token
         self._refresh_token = output.data.refresh_token
 
-        print(f"_authorize_session: new token after {output.data.expires_in} seconds")
         self._authorize_session(output.data.expires_in)
