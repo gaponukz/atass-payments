@@ -19,15 +19,15 @@ class SessionCreds:
 
 
 class HttpPaymentSession:
-    def __init__(self, creds: SessionCreds):
+    def __init__(self, creds: SessionCreds, session: requests.Session):
         self._url = creds.url
         self._creds = creds
-        self._session = requests.Session()
+        self._session = session
         self._factory = dataclass_factory.Factory()
 
         self._access_token: str | None = None
 
-        threading.Thread(target=self._authorize_session).start()
+        threading.Thread(target=self._authorize_session, daemon=True).start()
 
     def create_payment(
         self, data: CreateExternalPaymentDTO
