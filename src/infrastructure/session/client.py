@@ -19,15 +19,15 @@ class SessionCreds:
 
 
 class HttpPaymentSession:
-    def __init__(self, creds: SessionCreds):
+    def __init__(self, creds: SessionCreds, session: requests.Session):
         self._url = creds.url
         self._creds = creds
-        self._session = requests.Session()
+        self._session = session
         self._factory = dataclass_factory.Factory()
 
         self._access_token: str | None = None
 
-        threading.Thread(target=self._authorize_session).start()
+        threading.Thread(target=self._authorize_session, daemon=True).start()
 
     def create_payment(
         self, data: CreateExternalPaymentDTO
@@ -100,11 +100,8 @@ class HttpPaymentSession:
             f"{self._url}/auth/token", json=self._factory.dump(body)
         )
 
-        print(f"body: {response.json()}")
-
         output = self._factory.load(response.json(), dto.GetTokensDTO)
         self._access_token = output.data.access_token
         self._refresh_token = output.data.refresh_token
 
-        print(f"_authorize_session: new token after {output.data.expires_in} seconds")
         self._authorize_session(output.data.expires_in)
