@@ -43,10 +43,10 @@ jobs:
         pip install -r requirements.txt
 
     - name: Run unit tests
-      run: pytest tests/unit --capture=no
+      run: python -m pytest tests/unit --capture=no
     
     - name: Run integration tests
-      run: pytest tests/integration --capture=no
+      run: python -m pytest tests/integration --capture=no
   
 #   docker:
 #     name: Publishes to Docker Hub
